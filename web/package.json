@@ -10,11 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@solidjs/router": "^0.9.1",
+    "axios": "^1.6.2",
+    "rxjs": "^7.8.1",
+    "socket.io-client": "^4.7.2",
     "solid-fa": "^0.2.0",
     "solid-js": "^1.7.8"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
     "autoprefixer": "^10.4.16",
     "daisyui": "^3.9.4",
     "postcss": "^8.4.31",

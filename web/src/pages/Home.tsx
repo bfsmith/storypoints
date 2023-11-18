@@ -41,7 +41,12 @@ function Home() {
         <div class="divider divider-horizontal">OR</div>
         <form class="flex flex-col gap-4">
           <div class="form-control w-full max-w-xs">
-            <button class="btn btn-secondary" onClick={() => navigateToRoom('test')}>Create a room</button>
+            <button
+              class="btn btn-secondary"
+              onClick={() => navigateToRoom("test")}
+            >
+              Create a room
+            </button>
           </div>
         </form>
       </div>
