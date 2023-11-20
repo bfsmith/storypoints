@@ -48,6 +48,7 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     await Promise.all(
       rooms.map(async (room) => {
         room.members = room.members.filter((m) => m !== user.name);
+        room.votes = room.votes.filter((v) => v.user !== user.name);
         await this.roomService.update(room);
         this.sendRoomUpdate(room);
       }),
