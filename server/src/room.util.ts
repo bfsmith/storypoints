@@ -15,3 +15,11 @@ export async function toRoomDetails(
   };
   return roomDetails;
 }
+
+export async function toRoom(room: RoomDetails): Promise<Room> {
+  const roomDetails: Room = {
+    ...room,
+    members: room.members.map((m) => m.id),
+  };
+  return roomDetails;
+}

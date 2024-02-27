@@ -1,5 +1,6 @@
 import { useNavigate } from '@solidjs/router';
 import { createSignal } from 'solid-js';
+import { v4 as uuid } from 'uuid';
 import { useUser } from '../api/user';
 
 function Who() {
@@ -32,7 +33,7 @@ function Who() {
               disabled={!username()}
               onClick={() => {
                 user.setUser((u) => ({
-                  id: u?.id || username(),
+                  id: u?.id || uuid(),
                   name: username(),
                 }));
                 navigate("/");

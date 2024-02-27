@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import { OneToMany } from 'typeorm';
 import { RoomService } from './room.service';
 import { toRoomDetails } from './room.util';
 import { SocketService } from './socket.service';
@@ -49,8 +50,9 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
 
     await Promise.all(
       rooms.map(async (room) => {
-        room.members = room.members.filter((m) => m !== user.name);
-        room.votes = room.votes.filter((v) => v.userId !== user.name);
+        room.members = room.members.filter((m) => m !== user.id);
+        room.votes = room.votes.filter((v) => v.userId !== user.id);
+        room = await this.cleanUsers(room);
         await this.roomService.update(room);
         this.sendRoomUpdate(room);
       }),
@@ -73,15 +75,15 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     });
     let room = await this.roomService.get(message.room);
     if (room) {
+      this.server.in(room.id).socketsJoin(client.id);
+      client.join(room.id);
+      this.socketService.join(client.id, room);
       if (!room.members.includes(message.userId)) {
         room.members = [...room.members, message.userId];
         room = await this.roomService.update(room);
         console.log('updated room', room);
-        this.server.in(room.id).socketsJoin(client.id);
-        client.join(room.id);
-        this.socketService.join(client.id, room);
-        this.sendRoomUpdate(room);
       }
+      this.sendRoomUpdate(room);
     }
   }
 
@@ -140,6 +142,33 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
       this.roomService.update(room);
       this.sendRoomUpdate(room);
     }
+  }
+
+  private async cleanUsers(room: Room) {
+    const missingUsers = (
+      await Promise.all(
+        room.members.map(async (m) => {
+          const user = await this.userService.getById(m);
+          if (!user) {
+            return m;
+          }
+          return null;
+        }),
+      )
+    ).filter((m) => !!m);
+
+    if (missingUsers.length > 0) {
+      return {
+        ...room,
+        members: room.members.filter((m) => !missingUsers.includes(m)),
+        votes: room.votes.filter((v) => room.members.includes(v.userId)),
+      };
+    }
+
+    return {
+      ...room,
+      votes: room.votes.filter((v) => room.members.includes(v.userId)),
+    };
   }
 
   private async sendRoomUpdate(room: Room) {

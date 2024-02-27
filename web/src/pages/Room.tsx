@@ -1,4 +1,4 @@
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, useParams } from '@solidjs/router';
 import Fa from 'solid-fa';
 import {
@@ -13,9 +13,9 @@ import Card from '../components/card';
 import Loading from '../components/loading';
 import { Room } from '../models/room';
 import { User } from '../models/user';
-``
+``;
 interface UserVote {
-  user: User,
+  user: User;
   vote: number | null;
 }
 
@@ -40,7 +40,7 @@ function RoomPage() {
       (v) => v.userId === userManagement.user()?.id
     );
     if (existingVote) {
-      setSelectedPoint(existingVote.points);
+      setSelectedPoint(existingVote.vote);
     }
   });
 
@@ -52,6 +52,11 @@ function RoomPage() {
       connectedWs.on("room", (e) => {
         console.log("room", e);
         setRoom(e.room);
+        const myVote = e.room.votes.find(
+          (v) => v.userId === userManagement.user()!.id
+        );
+        console.log('settings points to ', myVote?.vote);
+        setSelectedPoint(myVote?.vote);
       });
       const user = userManagement.user()!;
       connectedWs.emit("join", {
@@ -93,7 +98,7 @@ function RoomPage() {
           vote: votes.find((v) => v.userId === member.id)?.vote ?? null,
         } as UserVote)
     );
-    console.log('user votes', userVotes);
+    console.log("user votes", userVotes);
     return userVotes;
   });
 
@@ -102,9 +107,9 @@ function RoomPage() {
       <Show when={room()} fallback={<Loading />}>
         <div class="flex flex-col gap-16">
           {/* <div>{JSON.stringify(room())}</div> */}
-          <div>Welcome to the room {room()!.name}!</div>
-          <div>{room()!.title}</div>
-          <div>{room()?.description}</div>
+          {/* <div>Welcome to the room {room()!.name}!</div> */}
+          {/* <div>{room()!.title}</div>
+          <div>{room()?.description}</div> */}
           <div class="flex flex-row flex-wrap gap-4">
             {room()?.pointOptions.map((points) => (
               <Card
@@ -115,7 +120,20 @@ function RoomPage() {
             ))}
           </div>
           <div>
-            <div class="text-2xl">Votes</div>
+            <div class="flex flex-row justify-between">
+              <div class="text-2xl">Votes</div>
+              <div
+                class="cursor-pointer"
+                onClick={() => {
+                  ws()!.emit("clearVotes", {
+                    room: room()!.id,
+                    userId: userManagement.user()!.id,
+                  });
+                }}
+              >
+                <Fa class="inline" icon={faTrash} />
+              </div>
+            </div>
             <table class="table table-lg text-xl">
               <thead>
                 <tr>
