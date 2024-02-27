@@ -5,7 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   await app.listen(Number(process.env.PORT) || 3000);
-  
+
   // Gracefully shutdown the server.
   app.enableShutdownHooks();
 }

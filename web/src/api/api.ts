@@ -3,6 +3,10 @@ import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '../models/messages';
 import { Room } from '../models/room';
 
+const domain = 'localhost:3000';
+const baseApiUrl = `http://${domain}`;
+const baseSocketUrl = `ws://${domain}`;
+
 export interface RoomCreateOptions
   extends Omit<Room, "id" | "members" | "votes" | "areVotesVisible"> {
   id?: string;
@@ -10,7 +14,7 @@ export interface RoomCreateOptions
 
 export async function getRoom(roomId: string): Promise<Room | undefined> {
   try {
-    const resp = await axios.get<Room>(`http://localhost:3001/api/rooms/${roomId}`);
+    const resp = await axios.get<Room>(`${baseApiUrl}/api/rooms/${roomId}`);
 
     const room = resp.data;
     return room;
@@ -37,7 +41,7 @@ export async function createRoom(
   room: RoomCreateOptions
 ): Promise<Room | undefined> {
   try {
-    const resp = await axios.post<Room>(`http://localhost:3001/api/rooms`, room);
+    const resp = await axios.post<Room>(`${baseApiUrl}/api/rooms`, room);
  
     const createdRoom = resp.data;
     return createdRoom;
@@ -53,6 +57,6 @@ export async function createRoom(
 export type RoomSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export function webSocketConnect(): RoomSocket {
-  const ws: RoomSocket = io("ws://localhost:3001");
+  const ws: RoomSocket = io(baseSocketUrl);
   return ws;
 }

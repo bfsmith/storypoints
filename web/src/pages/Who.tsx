@@ -1,10 +1,12 @@
+import { useNavigate } from '@solidjs/router';
 import { createSignal } from 'solid-js';
 import { useUser } from '../api/user';
 
 function Who() {
   const user = useUser();
   const [username, setUsername] = createSignal("");
-  
+  const navigate = useNavigate();
+
   return (
     <div class="flex flex-row gap-4 h-screen w-screen items-center justify-center">
       <div class="flex flex-row gap-4 items-center">
@@ -28,11 +30,13 @@ function Who() {
             <button
               class="btn btn-primary"
               disabled={!username()}
-              onClick={() =>
-                user.setUser({
+              onClick={() => {
+                user.setUser((u) => ({
+                  id: u?.id || username(),
                   name: username(),
-                })
-              }
+                }));
+                navigate("/");
+              }}
             >
               Set
             </button>

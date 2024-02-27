@@ -1,27 +1,36 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Room } from './models';
 
 @Injectable()
 export class RoomService {
-  private readonly rooms: Record<string, Room> = {};
+  constructor(
+    @InjectRepository(Room)
+    private readonly roomRepository: Repository<Room>,
+  ) {}
 
   async create(room: Room): Promise<Room> {
-    this.rooms[room.id] = room;
-    return room;
+    const created = await this.roomRepository.save(room);
+    return created;
   }
 
   async update(room: Room): Promise<Room> {
-    this.rooms[room.id] = room;
-    return room;
+    const updated = await this.roomRepository.save(room);
+    console.log('updated room', updated);
+    return updated;
   }
 
   async list(): Promise<Room[]> {
-    const allRooms = Object.values(this.rooms);
-    const sortedRooms = allRooms.sort((a, b) => a.name.localeCompare(b.name));
+    const allRooms = await this.roomRepository.find();
+    const sortedRooms = allRooms.sort((a, b) => a.title.localeCompare(b.title));
     return sortedRooms;
   }
 
   async get(roomId: string): Promise<Room | undefined> {
-    return this.rooms[roomId];
+    const room = await this.roomRepository.findOneBy({
+      id: roomId,
+    });
+    return room;
   }
 }

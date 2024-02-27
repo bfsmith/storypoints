@@ -13,6 +13,7 @@ function App() {
       <Header />
       {user.user() ? (
         <Routes>
+          <Route path="/user" component={Who} />
           <Route path="/:room" component={Room} />
           <Route path="/" component={Home} />
         </Routes>

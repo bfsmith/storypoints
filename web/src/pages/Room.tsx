@@ -12,10 +12,11 @@ import { useUser } from '../api/user';
 import Card from '../components/card';
 import Loading from '../components/loading';
 import { Room } from '../models/room';
-
+import { User } from '../models/user';
+``
 interface UserVote {
-  user: string;
-  points: number | null;
+  user: User,
+  vote: number | null;
 }
 
 function RoomPage() {
@@ -36,7 +37,7 @@ function RoomPage() {
     console.log("room found", r);
     setRoom(r);
     const existingVote = r?.votes.find(
-      (v) => v.user === userManagement.user()?.name
+      (v) => v.userId === userManagement.user()?.id
     );
     if (existingVote) {
       setSelectedPoint(existingVote.points);
@@ -52,9 +53,11 @@ function RoomPage() {
         console.log("room", e);
         setRoom(e.room);
       });
+      const user = userManagement.user()!;
       connectedWs.emit("join", {
         room: room()!.id,
-        user: userManagement.user()!.name,
+        userId: user.id,
+        userName: user.name,
       });
       setWs(connectedWs);
     }
@@ -67,10 +70,11 @@ function RoomPage() {
       setSelectedPoint(points);
     }
     if (ws()?.connected) {
+      console.log("voting", selectedPoint());
       ws()!.emit("vote", {
-        points: selectedPoint(),
+        vote: selectedPoint(),
         room: roomId,
-        user: userManagement.user()?.name ?? "test",
+        userId: userManagement.user()!.id,
       });
     }
   };
@@ -86,9 +90,10 @@ function RoomPage() {
       (member) =>
         ({
           user: member,
-          points: votes.find((v) => v.user === member)?.points ?? null,
+          vote: votes.find((v) => v.userId === member.id)?.vote ?? null,
         } as UserVote)
     );
+    console.log('user votes', userVotes);
     return userVotes;
   });
 
@@ -122,7 +127,7 @@ function RoomPage() {
                       onClick={() =>
                         ws()?.emit("show", {
                           room: room()!.id,
-                          user: userManagement.user()!.name,
+                          userId: userManagement.user()!.id,
                           show: !room()!.areVotesVisible,
                         })
                       }
@@ -138,11 +143,11 @@ function RoomPage() {
               <tbody>
                 {userVotes().map((vote) => (
                   <tr class="hover">
-                    <td class="text-xl">{vote.user}</td>
+                    <td class="text-xl">{vote.user.name}</td>
                     <td class="text-xl">
-                      {vote.points != undefined
+                      {vote.vote != undefined
                         ? room()?.areVotesVisible
-                          ? vote.points
+                          ? vote.vote
                           : "?"
                         : null}
                     </td>

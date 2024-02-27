@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import { RoomService } from './room.service';
+import { toRoomDetails } from './room.util';
 import { SocketService } from './socket.service';
 import { UserService } from './user.service';
 import {
@@ -7,6 +8,7 @@ import {
   ClientToServerEvents,
   JoinRoomMessage,
   Room,
+  RoomDetails,
   RoomMessage,
   ServerToClientEvents,
   ShowVotesRoomMessage,
@@ -48,7 +50,7 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     await Promise.all(
       rooms.map(async (room) => {
         room.members = room.members.filter((m) => m !== user.name);
-        room.votes = room.votes.filter((v) => v.user !== user.name);
+        room.votes = room.votes.filter((v) => v.userId !== user.name);
         await this.roomService.update(room);
         this.sendRoomUpdate(room);
       }),
@@ -65,14 +67,17 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     console.log('join received', message);
-    this.userService.set(client.id, { name: message.user });
+    this.userService.set(client.id, {
+      id: message.userId,
+      name: message.userName,
+    });
     let room = await this.roomService.get(message.room);
     if (room) {
-      if (!room.members.includes(message.user)) {
-        room.members = [...room.members, message.user];
+      if (!room.members.includes(message.userId)) {
+        room.members = [...room.members, message.userId];
         room = await this.roomService.update(room);
         console.log('updated room', room);
-        this.server.in(client.id).socketsJoin(room.id);
+        this.server.in(room.id).socketsJoin(client.id);
         client.join(room.id);
         this.socketService.join(client.id, room);
         this.sendRoomUpdate(room);
@@ -103,18 +108,18 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('vote received', message);
     const room = await this.roomService.get(message.room);
     if (room) {
-      const existingVote = room.votes.find((v) => v.user == message.user);
+      const existingVote = room.votes.find((v) => v.userId == message.userId);
 
       if (existingVote) {
-        existingVote.points = message.points;
+        existingVote.vote = message.vote;
       } else {
-        room.votes.push({ user: message.user, points: message.points });
+        room.votes.push({ userId: message.userId, vote: message.vote });
       }
 
       if (
         !room.areVotesVisible &&
         room.members.length ===
-          room.votes.filter((v) => v.points != undefined).length
+          room.votes.filter((v) => v.vote != undefined).length
       ) {
         room.areVotesVisible = true;
       }
@@ -137,7 +142,9 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private sendRoomUpdate(room: Room) {
-    this.server.to(room.id).emit('room', { room } as RoomMessage);
+  private async sendRoomUpdate(room: Room) {
+    console.log('Sending room update', room);
+    const roomDetails = await toRoomDetails(this.userService, room);
+    this.server.to(room.id).emit('room', { room: roomDetails } as RoomMessage);
   }
 }

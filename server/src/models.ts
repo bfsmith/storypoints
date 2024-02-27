@@ -1,37 +1,61 @@
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+
 export interface UserVotes {
-  user: string;
-  points: number;
+  userId: string;
+  vote: number;
 }
 
 export interface User {
+  /** UUID */
+  id: string;
   name: string;
 }
 
-export interface Room {
+@Entity()
+export class Room {
+  @PrimaryColumn()
   id: string;
+
+  @Column()
   name: string;
+
+  @Column('simple-array')
   pointOptions: number[];
+
+  @Column('simple-array')
   members: string[];
+
+  @Column()
   title: string;
+
+  @Column()
   description: string;
+
+  @Column('simple-json')
   votes: UserVotes[];
+
+  @Column()
   areVotesVisible: boolean;
 }
 
+export interface RoomDetails extends Omit<Room, 'members'> {
+  members: User[];
+}
+
 export interface RoomMessage {
-  room: Room;
+  room: RoomDetails;
 }
 
 export interface RoomActionMessage {
   room: string;
-  user: string;
+  userId: string;
 }
 
 export interface JoinRoomMessage extends RoomActionMessage {
+  userName: string;
 }
 
-export interface ClearVotesRoomMessage extends RoomActionMessage {
-}
+export interface ClearVotesRoomMessage extends RoomActionMessage {}
 
 export interface ShowVotesRoomMessage extends RoomActionMessage {
   show: boolean;
@@ -39,8 +63,8 @@ export interface ShowVotesRoomMessage extends RoomActionMessage {
 
 export interface VoteMessage {
   room: string;
-  user: string;
-  points: number | undefined;
+  userId: string;
+  vote: number | undefined;
 }
 
 export interface ServerToClientEvents {

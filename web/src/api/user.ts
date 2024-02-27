@@ -5,15 +5,21 @@ const USER_STORAGE_KEY = "user";
 
 export interface UserManagement {
   user: Accessor<User | undefined>;
-  setUser: (user: User | undefined) => void;
+  setUser: (user: User | undefined | ((previous: User | undefined) => User | undefined)) => void;
 }
 
 export function useUser(): UserManagement {
   const user = getUser();
   const [userAccessor, userSetter] = createSignal<User | undefined>(user);
-  const updateUser = (user: User | undefined) => {
-    setUser(user);
-    userSetter(user);
+  const updateUser = (updateUser: User | undefined | ((previous: User | undefined) => User | undefined)) => {
+    if (typeof updateUser === 'function') {
+      const updatedUser = updateUser(userAccessor());
+      setUser(updatedUser);
+      userSetter(updateUser);
+    } else {
+      setUser(updateUser);
+      userSetter(updateUser);
+    }
   };
   return {
     user: userAccessor,

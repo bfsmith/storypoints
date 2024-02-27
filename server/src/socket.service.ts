@@ -3,11 +3,14 @@ import { Room } from './models';
 
 @Injectable()
 export class SocketService {
+  /**
+   * SocketId => Rooms[]
+   */
   private readonly sockets: Record<string, Room[]> = {};
 
   async join(socketId: string, room: Room): Promise<void> {
     const rooms: Room[] = this.sockets[socketId] ?? [];
-    if (!rooms.some(r => r.id == room.id)) {
+    if (!rooms.some((r) => r.id == room.id)) {
       this.sockets[socketId] = [...rooms, room];
     }
   }
@@ -19,7 +22,7 @@ export class SocketService {
 
   async leave(socketId: string, room: Room): Promise<void> {
     const rooms: Room[] = this.sockets[socketId] ?? [];
-    this.sockets[socketId] = rooms.filter(r => r.id !== room.id);
+    this.sockets[socketId] = rooms.filter((r) => r.id !== room.id);
   }
 
   async leaveAll(socketId: string): Promise<void> {

@@ -6,10 +6,11 @@ export interface RoomMessage {
 
 export interface RoomActionMessage {
   room: string;
-  user: string;
+  userId: string;
 }
 
 export interface JoinRoomMessage extends RoomActionMessage {
+  userName: string;
 }
 
 export interface ClearVotesRoomMessage extends RoomActionMessage {
@@ -21,8 +22,8 @@ export interface ShowVotesRoomMessage extends RoomActionMessage {
 
 export interface VoteMessage {
   room: string;
-  user: string;
-  points: number | undefined;
+  userId: string;
+  vote: number | undefined;
 }
 
 export interface ServerToClientEvents {

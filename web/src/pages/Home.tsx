@@ -10,7 +10,7 @@ function Home() {
   };
 
   return (
-    <div class="flex flex-row gap-4 h-screen w-screen items-center justify-center">
+    <div class="flex flex-row gap-4 h-screen items-center justify-center">
       <div class="flex flex-row gap-4 items-center">
         <form class="flex flex-col gap-4">
           <div class="form-control w-full max-w-xs">
