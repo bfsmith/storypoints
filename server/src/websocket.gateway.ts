@@ -52,15 +52,14 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
       rooms.map(async (room) => {
         room.members = room.members.filter((m) => m !== user.id);
         room.votes = room.votes.filter((v) => v.userId !== user.id);
-        room = await this.cleanUsers(room);
+        // room = await this.cleanUsers(room);
         await this.roomService.update(room);
         this.sendRoomUpdate(room);
       }),
     );
   }
 
-  async handleConnection(client: any, ...args: any[]) {
-  }
+  async handleConnection(client: any, ...args: any[]) {}
 
   @SubscribeMessage('join')
   async handleJoin(

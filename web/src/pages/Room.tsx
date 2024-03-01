@@ -11,9 +11,10 @@ import { getRoom, RoomSocket, webSocketConnect } from '../api/api';
 import { useUser } from '../api/user';
 import Card from '../components/card';
 import Loading from '../components/loading';
+import { celebrate } from '../effects/confetti';
 import { Room } from '../models/room';
 import { User } from '../models/user';
-``;
+
 interface UserVote {
   user: User;
   vote: number | null;
@@ -54,6 +55,7 @@ function RoomPage() {
           (v) => v.userId === userManagement.user()!.id
         );
         setSelectedPoint(myVote?.vote);
+        checkVotes(e.room);
       });
       const user = userManagement.user()!;
       connectedWs.emit("join", {
@@ -64,6 +66,27 @@ function RoomPage() {
       setWs(connectedWs);
     }
   });
+
+  const checkVotes = (room: Room) => {
+    console.log("checking room votes", room);
+    if (
+      !room.areVotesVisible ||
+      room.votes.length === 0 ||
+      room.votes.filter(uv => uv.vote != undefined).length !== room.members.length
+    ) {
+      return;
+    }
+
+    const votesToCount = room.votes.filter((vote) => vote.vote >= 0);
+    if (votesToCount.length === 0) {
+      return;
+    }
+
+    const v = votesToCount[0].vote;
+    if (votesToCount.every((vote) => vote.vote === v)) {
+      celebrate();
+    }
+  };
 
   const vote = (points: number) => {
     if (selectedPoint() === points) {
@@ -105,6 +128,11 @@ function RoomPage() {
           {/* <div>{room()!.title}</div>
           <div>{room()?.description}</div> */}
           <div class="flex flex-row flex-wrap gap-4">
+            <Card
+              points={-1}
+              isSelected={-1 === selectedPoint()}
+              onSelect={() => vote(-1)}
+            />
             {room()?.pointOptions.map((points) => (
               <Card
                 points={points}
@@ -159,7 +187,9 @@ function RoomPage() {
                     <td class="text-xl">
                       {vote.vote != undefined
                         ? room()?.areVotesVisible
-                          ? vote.vote
+                          ? vote.vote >= 0
+                            ? vote.vote
+                            : "-"
                           : "?"
                         : null}
                     </td>
