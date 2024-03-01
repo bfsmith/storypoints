@@ -34,7 +34,6 @@ function RoomPage() {
       navigate("/");
       return;
     }
-    console.log("room found", r);
     setRoom(r);
     const existingVote = r?.votes.find(
       (v) => v.userId === userManagement.user()?.id
@@ -50,12 +49,10 @@ function RoomPage() {
       connectedWs.on("connect", () => console.log("connected"));
       connectedWs.on("disconnect", () => console.log("disconnected"));
       connectedWs.on("room", (e) => {
-        console.log("room", e);
         setRoom(e.room);
         const myVote = e.room.votes.find(
           (v) => v.userId === userManagement.user()!.id
         );
-        console.log('settings points to ', myVote?.vote);
         setSelectedPoint(myVote?.vote);
       });
       const user = userManagement.user()!;
@@ -75,7 +72,6 @@ function RoomPage() {
       setSelectedPoint(points);
     }
     if (ws()?.connected) {
-      console.log("voting", selectedPoint());
       ws()!.emit("vote", {
         vote: selectedPoint(),
         room: roomId,
@@ -87,7 +83,6 @@ function RoomPage() {
   const userVotes = createMemo(() => {
     const members = room()?.members;
     const votes = room()?.votes;
-    console.log("rendering votes");
     if (!members || !votes) {
       return [];
     }
@@ -98,7 +93,6 @@ function RoomPage() {
           vote: votes.find((v) => v.userId === member.id)?.vote ?? null,
         } as UserVote)
     );
-    console.log("user votes", userVotes);
     return userVotes;
   });
 

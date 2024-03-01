@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '../models/messages';
 import { Room } from '../models/room';
 
-const domain = 'localhost:3000';
+const domain = import.meta.env.PROD ? window.location.host : 'localhost:3001';
 const baseApiUrl = `http://${domain}`;
 const baseSocketUrl = `ws://${domain}`;
 

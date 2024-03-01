@@ -19,7 +19,6 @@ export class RoomService {
 
   async update(room: Room): Promise<Room> {
     const updated = await this.roomRepository.save(room);
-    console.log('updated room', updated);
     return updated;
   }
 

@@ -60,7 +60,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleConnection(client: any, ...args: any[]) {
-    console.log('new connection!', client.id);
   }
 
   @SubscribeMessage('join')
@@ -68,7 +67,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: JoinRoomMessage,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('join received', message);
     this.userService.set(client.id, {
       id: message.userId,
       name: message.userName,
@@ -81,7 +79,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
       if (!room.members.includes(message.userId)) {
         room.members = [...room.members, message.userId];
         room = await this.roomService.update(room);
-        console.log('updated room', room);
       }
       this.sendRoomUpdate(room);
     }
@@ -92,7 +89,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: ClearVotesRoomMessage,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('clearVotes received', message);
     const room = await this.roomService.get(message.room);
     if (room) {
       room.areVotesVisible = false;
@@ -107,7 +103,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: VoteMessage,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('vote received', message);
     const room = await this.roomService.get(message.room);
     if (room) {
       const existingVote = room.votes.find((v) => v.userId == message.userId);
@@ -135,7 +130,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: ShowVotesRoomMessage,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('show received', message);
     const room = await this.roomService.get(message.room);
     if (room) {
       room.areVotesVisible = message.show;
@@ -172,7 +166,6 @@ export class WebSocket implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private async sendRoomUpdate(room: Room) {
-    console.log('Sending room update', room);
     const roomDetails = await toRoomDetails(this.userService, room);
     this.server.to(room.id).emit('room', { room: roomDetails } as RoomMessage);
   }

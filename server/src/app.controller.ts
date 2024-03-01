@@ -26,7 +26,6 @@ export class AppController {
   @Get('')
   public async listRooms(): Promise<Room[]> {
     const rooms = await this.roomService.list();
-    console.log('returning rooms', rooms);
     return rooms;
   }
 
@@ -35,7 +34,6 @@ export class AppController {
     @Param('roomId') roomId: string,
   ): Promise<RoomDetails | undefined> {
     const room = await this.roomService.get(roomId);
-    console.log('returning room', roomId, room);
 
     if (!room) {
       throw new NotFoundException();
@@ -49,7 +47,6 @@ export class AppController {
   public async createRoom(
     @Body() createOptions: RoomCreateOptions,
   ): Promise<Room> {
-    console.log('create options', createOptions);
     const newRoom: Room = {
       ...createOptions,
       id: createOptions.id || 'test',

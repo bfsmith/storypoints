@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Room } from './models';
@@ -14,6 +16,12 @@ import { WebSocket } from './websocket.gateway';
   imports: [
     TypeOrmModule.forRoot(typeormConfig),
     TypeOrmModule.forFeature([Room]),
+    ServeStaticModule.forRoot({
+      rootPath:
+        process.env.NODE_ENV === 'production'
+          ? join(__dirname, '..', 'web')
+          : join(__dirname, '..', '..', 'web', 'dist'),
+    }),
   ],
   controllers: [AppController],
   providers: [
