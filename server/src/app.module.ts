@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthController } from './health.controller';
 import { Room } from './models';
 import { InMemoryRoomRepository } from './room.repository';
 import { RoomService } from './room.service';
@@ -23,7 +24,7 @@ import { WebSocket } from './websocket.gateway';
           : join(__dirname, '..', '..', 'web', 'dist'),
     }),
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [
     AppService,
     WebSocket,
