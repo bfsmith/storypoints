@@ -3,9 +3,11 @@ import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '../models/messages';
 import { Room } from '../models/room';
 
-const domain = import.meta.env.PROD ? window.location.host : 'localhost:3001';
+const domain = import.meta.env.PROD ? window.location.host : "localhost:3001";
 const baseApiUrl = `${window.location.protocol}//${domain}`;
-const baseSocketUrl = `ws://${domain}`;
+const baseSocketUrl = `${
+  window.location.protocol === "https:" ? "wss" : "ws"
+}://${domain}`;
 
 export interface RoomCreateOptions
   extends Omit<Room, "id" | "members" | "votes" | "areVotesVisible"> {
@@ -30,9 +32,7 @@ export async function getRoom(roomId: string): Promise<Room | undefined> {
   }
 }
 
-export async function createRoom(
-  room: RoomCreateOptions
-): Promise<Room> {
+export async function createRoom(room: RoomCreateOptions): Promise<Room> {
   try {
     const resp = await axios.post<Room>(`${baseApiUrl}/api/rooms`, room);
     const createdRoom = resp.data;
