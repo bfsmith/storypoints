@@ -24,25 +24,17 @@ export async function getRoom(roomId: string): Promise<Room | undefined> {
       if (err.response?.status != 404) {
         throw Error(e.message);
       }
-
-      const newRoom = await createRoom({
-        id: roomId,
-        name: "Test Room",
-        description: "This is my test room",
-        pointOptions: [1, 2, 3, 5, 8, 13, 21],
-        title: "First thing to point",
-      });
-      return newRoom;
+      return undefined;
     }
+    throw e;
   }
 }
 
 export async function createRoom(
   room: RoomCreateOptions
-): Promise<Room | undefined> {
+): Promise<Room> {
   try {
     const resp = await axios.post<Room>(`${baseApiUrl}/api/rooms`, room);
- 
     const createdRoom = resp.data;
     return createdRoom;
   } catch (e: any) {

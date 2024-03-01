@@ -39,7 +39,7 @@ export class AppController {
 
     if (!room) {
       throw new NotFoundException();
-    } 
+    }
 
     const roomDetails = await toRoomDetails(this.userService, room);
     return roomDetails;
