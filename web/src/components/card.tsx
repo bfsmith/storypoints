@@ -1,4 +1,4 @@
-import { faQ, faQuestion } from '@fortawesome/free-solid-svg-icons';
+import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'solid-fa';
 
 interface Props {
