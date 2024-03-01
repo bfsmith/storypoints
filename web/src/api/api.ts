@@ -4,7 +4,7 @@ import { ClientToServerEvents, ServerToClientEvents } from '../models/messages';
 import { Room } from '../models/room';
 
 const domain = import.meta.env.PROD ? window.location.host : 'localhost:3001';
-const baseApiUrl = `http://${domain}`;
+const baseApiUrl = `${window.location.protocol}//${domain}`;
 const baseSocketUrl = `ws://${domain}`;
 
 export interface RoomCreateOptions
