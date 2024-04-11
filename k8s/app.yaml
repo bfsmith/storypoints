@@ -1,0 +1,99 @@
+--- # Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: app
+    app: storypoints
+  name: storypoints-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: app
+      app: storypoints
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        component: app
+        app: storypoints
+    spec:
+      containers:
+        - image: ghcr.io/bfsmith/storypoints:latest
+          name: storypoints-app
+          imagePullPolicy: "Always"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          resources:
+            limits:
+              cpu: "125m"
+              memory: "256Mi"
+          env:
+            - name: PORT
+              value: "3000"
+      imagePullSecrets:
+        - name: github
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    component: app
+    app: storypoints
+  name: storypoints
+  namespace: default
+spec:
+  selector:
+    component: app
+    app: storypoints
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    component: app
+    app: storypoints
+  name: storypoints
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  tls:
+    - secretName: tls-storypoints
+      hosts:
+        - points.mentallyelastic.com
+  rules:
+    - host: points.mentallyelastic.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: storypoints
+                port:
+                  number: 3000
